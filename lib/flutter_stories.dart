@@ -171,9 +171,7 @@ class _StoryState extends State<Story> with SingleTickerProviderStateMixin {
       _controller.duration = widget.momentDurationGetter(_currentIdx);
       _controller.forward();
     } else if (_currentIdx == widget.momentCount - 1) {
-      // setState(() => _currentIdx = widget.momentCount);
-      setState(() => _currentIdx = 0);
-      widget.onFlashForward!();
+      setState(() => _currentIdx = widget.momentCount);
     }
   }
 
