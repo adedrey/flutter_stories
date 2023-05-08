@@ -54,6 +54,7 @@ class Story extends StatefulWidget {
     this.progressOpacityDuration = const Duration(milliseconds: 300),
     this.momentSwitcherFraction = 0.33,
     this.startAt = 0,
+    this.statusBarPadding,
     this.topOffset,
     this.fullscreen = true,
   })  : assert(momentCount > 0),
@@ -64,6 +65,9 @@ class Story extends StatefulWidget {
         assert(startAt >= 0),
         assert(startAt < momentCount),
         super(key: key);
+
+  // Padding for Status Display Bar
+  final EdgeInsets? statusBarPadding;
 
   ///
   /// Builder that gets executed executed for each moment
@@ -167,7 +171,8 @@ class _StoryState extends State<Story> with SingleTickerProviderStateMixin {
       _controller.duration = widget.momentDurationGetter(_currentIdx);
       _controller.forward();
     } else if (_currentIdx == widget.momentCount - 1) {
-      setState(() => _currentIdx = widget.momentCount);
+      // setState(() => _currentIdx = widget.momentCount);
+      setState(() => _currentIdx = 0);
     }
   }
 
@@ -270,37 +275,40 @@ class _StoryState extends State<Story> with SingleTickerProviderStateMixin {
           top: widget.topOffset ?? MediaQuery.of(context).padding.top,
           left: 8.0 - widget.progressSegmentGap / 2,
           right: 8.0 - widget.progressSegmentGap / 2,
-          child: AnimatedOpacity(
-            opacity: _isInFullscreenMode ? 0.0 : 1.0,
-            duration: widget.progressOpacityDuration,
-            child: Row(
-              children: <Widget>[
-                ...List.generate(
-                  widget.momentCount,
-                  (idx) {
-                    return Expanded(
-                      child: idx == _currentIdx
-                          ? AnimatedBuilder(
-                              animation: _controller,
-                              builder: (context, _) {
-                                return widget.progressSegmentBuilder(
-                                  context,
-                                  idx,
-                                  _controller.value,
-                                  widget.progressSegmentGap,
-                                );
-                              },
-                            )
-                          : widget.progressSegmentBuilder(
-                              context,
-                              idx,
-                              idx < _currentIdx ? 1.0 : 0.0,
-                              widget.progressSegmentGap,
-                            ),
-                    );
-                  },
-                )
-              ],
+          child: Padding(
+            padding: widget.statusBarPadding ?? EdgeInsets.all(0),
+            child: AnimatedOpacity(
+              opacity: _isInFullscreenMode ? 0.0 : 1.0,
+              duration: widget.progressOpacityDuration,
+              child: Row(
+                children: <Widget>[
+                  ...List.generate(
+                    widget.momentCount,
+                    (idx) {
+                      return Expanded(
+                        child: idx == _currentIdx
+                            ? AnimatedBuilder(
+                                animation: _controller,
+                                builder: (context, _) {
+                                  return widget.progressSegmentBuilder(
+                                    context,
+                                    idx,
+                                    _controller.value,
+                                    widget.progressSegmentGap,
+                                  );
+                                },
+                              )
+                            : widget.progressSegmentBuilder(
+                                context,
+                                idx,
+                                idx < _currentIdx ? 1.0 : 0.0,
+                                widget.progressSegmentGap,
+                              ),
+                      );
+                    },
+                  )
+                ],
+              ),
             ),
           ),
         ),
